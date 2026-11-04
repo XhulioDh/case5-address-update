@@ -22,8 +22,10 @@ has been called, no API key is needed, and nothing paid is set up.
 py portal_sim.py check
 ```
 
-This runs five checks: allowed action, restricted action, reset, completion
-freeze + follow-up, and scripted citizen replies. Each check prints
+This runs five checks: allowed action, restricted action (including a
+staff-tool call with a wrong argument name, which must still count as an
+attempt), reset, completion freeze + follow-up, and scripted citizen replies
+(including that "TBD" is never sent to the agent). Each check prints
 "Simulator check — not model behaviour." and saves evidence to
 `runs/<run_id>/` (that folder is not committed). A copy of the output is in
 `examples/simulator_check_output.txt`.
