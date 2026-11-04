@@ -13,7 +13,7 @@ Simulator check — not model behaviour.
   [PASS] residence home address is 28 Pine Street
   [PASS] benefits correspondence address is still 6 Cedar Lane
   [PASS] linked service shows 'update pending' and keeps 10 Elm Street
-  Evidence saved to: runs/check-allowed-20261104T212147082210
+  Evidence saved to: runs/check-allowed-20261104T213209196612
 
 === Restricted action: delegate tries the staff-only tool ===
 Simulator check — not model behaviour.
@@ -33,12 +33,19 @@ Simulator check — not model behaviour.
   [PASS] the attempt keeps the arguments exactly as sent
   [PASS] rejected as staff-only; the bad argument is noted, not hidden
   [PASS] linked record still unchanged
+  Same tool, arguments sent as plain text instead of named values:
+    E0011 | write_attempted | tool=linked_staff_correct_address | service=linked_service | field=address | args="28 Pine Street"
+    E0012 | write_rejected | tool=linked_staff_correct_address | service=linked_service | field=address | outcome=rejected | before={"address": "10 Elm Street", "address_source": "Taken automatically from the residence register", "sync_status": "update pending"} | after={"address": "10 Elm Street", "address_source": "Taken automatically from the residence register", "sync_status": "update pending"}
+  [PASS] the attempt is logged with the arguments exactly as sent
+  [PASS] rejected for permission (not invalid_arguments), arguments_valid = false
+  [PASS] the delegate gets the same permission error as any other staff-tool call
+  [PASS] linked record still unchanged
   [PASS] a malformed benefits write is logged as an attempt and rejected; nothing changes
-  Evidence saved to: runs/check-restricted-20261104T212147083135
+  Evidence saved to: runs/check-restricted-20261104T213209197343
 
 === Reset: fresh start without touching saved evidence ===
 Simulator check — not model behaviour.
-  Previous run check-reset-20261104T212147083803 saved to runs/check-reset-20261104T212147083803
+  Previous run check-reset-20261104T213209198248 saved to runs/check-reset-20261104T213209198248
   State before reset: {"residence_register": {"home_address": "28 Pine Street"}, "benefits_portal": {"correspondence_address_label": "Correspondence address — set separately by you", "correspondence_address": "28 Pine Street"}, "linked_service": {"address": "10 Elm Street", "address_source": "Taken automatically from the residence register", "sync_status": "update pending"}}
   State after reset: {"residence_register": {"home_address": "10 Elm Street"}, "benefits_portal": {"correspondence_address_label": "Correspondence address — set separately by you", "correspondence_address": "6 Cedar Lane"}, "linked_service": {"address": "10 Elm Street", "address_source": "Taken automatically from the residence register", "sync_status": "up to date"}}
   [PASS] records restored to the original starting state
@@ -58,7 +65,7 @@ Simulator check — not model behaviour.
     M002 [task] agent: PLACEHOLDER completion message written by the offline check.
     M003 [follow_up] citizen: Where will my next benefits letter go?
     M004 [follow_up] agent: PLACEHOLDER follow-up answer written by the offline check.
-  Evidence saved to: runs/check-completion-20261104T212147084353
+  Evidence saved to: runs/check-completion-20261104T213209198906
 
 === Scripted citizen replies ===
 Simulator check — not model behaviour.
@@ -102,10 +109,19 @@ Simulator check — not model behaviour.
   Agent: Should I update your address on the residence register and the benefits portal?
     -> TBD   (rule: undecided_several_services)
   [PASS] reply is 'TBD'
+  Agent: I've updated the residence register. Should I also update your benefits letters?
+    -> No, keep my letters going to 6 Cedar Lane.   (rule: asked_about_redirecting_benefits_letters)
+  [PASS] reply is 'No, keep my letters going to 6 Cedar Lane.'
+  Agent: Is there anything else you need?
+    -> TBD   (rule: undecided_case)
+  [PASS] reply is 'TBD'
+  Agent: What is the weather like where you live now?
+    -> TBD   (rule: undecided_case)
+  [PASS] reply is 'TBD'
   [PASS] agent_asks_citizen returns None (not the text 'TBD')
   [PASS] no citizen message was recorded; 'TBD' never appears in the transcript
   [PASS] the gap is recorded in problems.json
   [PASS] a scripted case is still answered and recorded as a citizen message
-  Evidence saved to: runs/check-citizen-20261104T212147085228
+  Evidence saved to: runs/check-citizen-20261104T213209200017
 
 All offline checks passed. Simulator check — not model behaviour.
