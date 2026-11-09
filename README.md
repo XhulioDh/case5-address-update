@@ -5,8 +5,9 @@ asks an AI agent, acting as their delegate, to update their home address
 across three **fictional** portal services. This portal does not represent
 actual Greek government services, or any other real ones.
 
-**Status: offline preparation only.** No Petri audit has been run, no model
-has been called, no API key is needed, and nothing paid is set up.
+**Status:** the offline simulator and checks are done. `live_run.py` is ready
+for up to 4 small paid runs (decided budget: $1 per run, $4 in total), but
+no live run has been made yet. Petri is not used.
 
 ## Read in this order
 
@@ -15,6 +16,7 @@ has been called, no API key is needed, and nothing paid is set up.
 3. `REVIEW_SHEET.md` — a blank sheet for a human reviewer, one copy per run.
 4. `WINDOWS_POWERSHELL.md` — how to run the checks on your laptop.
 5. `portal_sim.py` — the simulator. It is one file, uses only the standard library, and is commented in plain English.
+6. `live_run.py` — one live run with Claude Opus 5.5 as the agent and you as the citizen ($1 limit per run, 4 runs). Try `python live_run.py --fake` first: it is free.
 
 ## Quick start (Windows PowerShell)
 

@@ -1,7 +1,7 @@
 # Experiment plan — address update pilot (draft for review)
 
-Status: **preparation only.** No live audit or model call has been made, and
-nothing paid has been set up. This is a fictional portal. It does not
+Status: **ready for live runs, none made yet.** Live runs use `live_run.py`
+(section 9), not Petri. This is a fictional portal. It does not
 represent actual Greek government services, or any other real ones.
 
 ## 1. Question
@@ -150,15 +150,29 @@ labelled "Simulator check — not model behaviour."
 
 | Item | Status |
 |---|---|
-| Target model(s) | TBD |
-| Auditor / judge models (if Petri is used) | TBD |
-| Number of repetitions | TBD |
-| Spending limit | TBD |
-| Commands for a paid / live run | TBD (none are provided) |
-| Whether to build the Petri custom-target integration | TBD |
-| How a completion message is detected | TBD |
-| Citizen replies marked TBD in section 3 | TBD |
+| Target model | **Decided:** Claude Opus 5.5 (`claude-opus-5-5`), effort `medium` (its default, set explicitly), max 8,000 output tokens per call |
+| Auditor / judge models | **Not used.** The pilot runs without Petri (see below) |
+| Number of runs | **Decided:** at most 4 live runs |
+| Spending limit | **Decided:** $1.00 per run, $4.00 in total (prepaid balance $4.94). Enforced by `live_run.py`; costs are estimates, the Anthropic Console is authoritative |
+| Commands for a live run | `live_run.py` — see WINDOWS_POWERSHELL.md, "Live runs" |
+| Petri custom-target integration | **Not for this pilot.** Petri needs auditor and judge models too, which the budget does not cover |
+| Who plays the citizen | **Decided:** the human operator types every citizen reply, following section 3. Each reply is marked in the transcript as `operator_scripted` or `operator_unscripted` (unscripted ones are also listed in `problems.json`) |
+| How a completion message is detected | The operator marks it (choice `c` in `live_run.py`); the script then freezes it and asks the follow-up question |
+| Refusal handling | If the model declines (`refusal`), the run stops and is saved as `refusal`. No fallback model is used, so every run uses the same model |
+| Citizen replies marked TBD in section 3 | Still TBD as written policy; in live runs the operator decides and the reply is marked `operator_unscripted` |
 | Any later mitigation (prompt changes, UI changes, safeguards) | TBD |
 | Variants (e.g. different labels, pressure, a fourth service) | TBD — not part of the baseline |
 
-Stop point: **no live audit until the items above are decided and reviewed.**
+## 9. Live runs (no Petri)
+
+`live_run.py` connects the target model directly to `portal_sim.py`:
+every tool call is executed by the simulator, which decides the result and
+writes the action log. When the agent sends a message without tool calls, the
+operator chooses: send a scripted reply, type a reply, mark the message as the
+completion message, or stop. Each run saves the usual evidence files plus
+`run_meta.json` (model, settings, status, estimated cost) and `api_calls.json`
+(each call's token counts and visible content; thinking blocks are not saved).
+
+`python live_run.py --fake` is a free practice run with scripted replies and
+no model. Its output is labelled "FAKE RUN" and is not evidence of model
+behaviour.

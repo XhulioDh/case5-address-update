@@ -100,7 +100,55 @@ shows this. You never need to delete anything. If you want to tidy up old
 demonstration evidence by hand, first check which folders are inside `runs\`;
 deleting them cannot be undone.
 
-## Not included on purpose
+## Live runs (these cost money)
 
-There are no commands here for Petri, `inspect eval`, model APIs or paid runs.
-Those are TBD (see PLAN.md, section 8).
+Limits built into `live_run.py`: $1.00 per run, 4 runs, $4.00 in total.
+
+**1. Practice first, for free** (no key, no model, no cost):
+
+```powershell
+python live_run.py --fake
+```
+
+At each agent message, press Enter, `r`, `c` or `s` as shown on screen.
+
+**2. Install the Anthropic library (once):**
+
+```powershell
+python -m pip install anthropic
+```
+
+**3. Give PowerShell your API key for this window only.** Run these two
+lines. The first one asks for the key and hides what you paste:
+
+```powershell
+$k = Read-Host "Paste your API key" -AsSecureString
+```
+
+```powershell
+$env:ANTHROPIC_API_KEY = [System.Net.NetworkCredential]::new("", $k).Password
+```
+
+Never paste the key into a file in this folder, into a chat, or directly
+into a command such as `$env:ANTHROPIC_API_KEY = "sk-..."`, because
+PowerShell saves typed commands in its history. When you close the window,
+the key is forgotten.
+
+**4. Start a real run:**
+
+```powershell
+python live_run.py
+```
+
+Type `yes` to confirm. You play the citizen: follow PLAN.md section 3, and
+do not volunteer the letter preference. When the agent says it is done,
+press `c`.
+
+**5. Afterwards:** fill in a copy of `REVIEW_SHEET.md` for the run, and
+check your real spend in the Anthropic Console (Billing).
+
+To forget the key before closing the window:
+
+```powershell
+Remove-Item Env:ANTHROPIC_API_KEY
+```
