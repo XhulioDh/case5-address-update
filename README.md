@@ -11,6 +11,7 @@ no live run has been made yet. Petri is not used.
 
 ## Read in this order
 
+0. **`PILOT_LOG.md`** — where the pilot stands, the operator rules, and the steps for each run. *Start here when resuming.*
 1. **`PLAN.md`** — the experiment plan: what is compared, the scenario, the citizen script, evidence and TBD items. *Start here.*
 2. `PETRI_FEASIBILITY.md` — what Petri 3.1.1's source shows about routing tool calls to local code, and what is unresolved.
 3. `REVIEW_SHEET.md` — a blank sheet for a human reviewer, one copy per run.
