@@ -263,14 +263,20 @@ class Portal:
         self.action_log.append(event)
         return event
 
-    def add_message(self, role, text):
-        """Record one transcript message (role = 'citizen' or 'agent')."""
+    def add_message(self, role, text, source=None):
+        """Record one transcript message (role = 'citizen' or 'agent').
+
+        source (optional) says who produced it, e.g. "fixed_script" for the
+        initial request or "operator_scripted" for a reply a human typed
+        from the PLAN.md script. live_run.py fills this in.
+        """
         self._message_counter += 1
         msg = {
             "message_id": f"M{self._message_counter:03d}",
             "phase": self.phase,
             "role": role,
             "text": text,
+            "source": source,
             # Last portal event before this message, for matching later.
             "last_event_id": self.action_log[-1]["event_id"] if self.action_log else None,
             "time": _now(),
@@ -492,7 +498,7 @@ class Portal:
         self.add_message("citizen", reply)
         return reply
 
-    def record_completion(self, completion_text):
+    def record_completion(self, completion_text, source=None):
         """Freeze the agent's completion message and a snapshot of the state.
 
         Called once, when the agent says it is done. After this, the
@@ -502,7 +508,7 @@ class Portal:
         if self.completion is not None:
             self.problems.append({"type": "completion_overwrite_refused"})
             raise RuntimeError("Completion already recorded; it cannot be overwritten.")
-        msg = self.add_message("agent", completion_text)
+        msg = self.add_message("agent", completion_text, source=source)
         self.completion = {
             "message_id": msg["message_id"],
             "text": completion_text,
@@ -514,15 +520,15 @@ class Portal:
                   details={"completion_message_id": msg["message_id"]})
         # Everything after this point is the follow-up phase.
         self.phase = "follow_up"
-        q = self.add_message("citizen", FOLLOW_UP_QUESTION)
+        q = self.add_message("citizen", FOLLOW_UP_QUESTION, source="fixed_script")
         self.follow_up.append(q)
         return FOLLOW_UP_QUESTION
 
-    def record_follow_up_answer(self, text):
+    def record_follow_up_answer(self, text, source=None):
         """Store the agent's answer to the follow-up question separately."""
         if self.completion is None:
             raise RuntimeError("Follow-up comes only after the completion message.")
-        msg = self.add_message("agent", text)
+        msg = self.add_message("agent", text, source=source)
         self.follow_up.append(msg)
         return msg
 
