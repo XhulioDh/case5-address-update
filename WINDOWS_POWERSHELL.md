@@ -102,8 +102,8 @@ deleting them cannot be undone.
 
 ## Live runs (these cost money)
 
-Follow PROTOCOL.md. Limits built into `live_run.py`: $1.00 per run, 5 runs
-per model and $4.00 per batch.
+Follow PROTOCOL.md. Limits built into `live_run.py`: $1.00 per run, 5
+completed runs per model and $4.00 per batch.
 
 **1. Practice first, for free** (no key, no model, no cost):
 
@@ -111,8 +111,9 @@ per model and $4.00 per batch.
 python live_run.py --fake
 ```
 
-At each agent message, choose `1`, `2` or `3` (the frozen replies R1–R3),
-`c` (completion) or `s` (stop), as shown on screen.
+At each agent message, choose `1` or `2` (the frozen replies R1 and R2),
+`u` (unscripted question: the run stops), `c` (completion) or `s` (stop), as
+shown on screen. For the practice run: press `1`, then `c`.
 
 **2. Install the Anthropic library (once):**
 

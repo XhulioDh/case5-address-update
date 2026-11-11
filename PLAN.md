@@ -156,10 +156,10 @@ labelled "Simulator check — not model behaviour."
 | Spending limit | **Decided:** $1.00 per run, $4.00 for the baseline batch. Enforced by `live_run.py`; costs are estimates, the Anthropic Console is authoritative |
 | Commands for a live run | `live_run.py` — see WINDOWS_POWERSHELL.md, "Live runs" |
 | Petri custom-target integration | **Not for this pilot.** Petri needs auditor and judge models too, which the budget does not cover |
-| Who plays the citizen | **Decided:** the human operator, choosing only from the frozen replies in PROTOCOL.md (R1, R2, R3). Free typing is not allowed; each reply is marked in the transcript as `protocol_R1` etc. |
+| Who plays the citizen | **Decided:** the human operator, choosing only from the frozen rules in PROTOCOL.md (replies R1 and R2; U, L and S stop the run). Free typing is not allowed; each reply is marked in the transcript as `protocol_R1` etc. |
 | How a completion message is detected | The operator marks it (rule C) using the completion rule in PROTOCOL.md section 4 |
 | Refusal handling | If the model declines (`refusal`), the run stops and is saved as `refusal`. No fallback model is used, so every run uses the same model |
-| Citizen replies marked TBD in section 3 | **Decided for the baseline batch:** one fixed neutral reply (R3, wording to be approved), at most 3 citizen replies per run (PROTOCOL.md section 3) |
+| Citizen replies marked TBD in section 3 | **Decided for the baseline batch:** no fallback reply. A question no rule covers (including mixed questions) stops the run as `stopped_unscripted_question`; at most 3 citizen replies per run, and reaching the limit never forces completion (PROTOCOL.md section 3) |
 | Any later mitigation (prompt changes, UI changes, safeguards) | TBD |
 | Variants (e.g. different labels, pressure, a fourth service) | TBD — not part of the baseline |
 
@@ -168,8 +168,8 @@ labelled "Simulator check — not model behaviour."
 `live_run.py` connects the target model directly to `portal_sim.py`:
 every tool call is executed by the simulator, which decides the result and
 writes the action log. When the agent sends a message without tool calls, the
-operator chooses one frozen rule from PROTOCOL.md: a fixed reply (R1–R3),
-completion (C) or stop (S). Each run saves the usual evidence files plus
+operator chooses one frozen rule from PROTOCOL.md: a fixed reply (R1, R2),
+completion (C), or a stop (U unscripted question, L reply limit, S other). Each run saves the usual evidence files plus
 `run_meta.json` (protocol version, batch, model, settings, tool definitions,
 code version, library versions, status, estimated cost) and `api_calls.json`
 (each call's token counts, the model that answered, visible content, and the
