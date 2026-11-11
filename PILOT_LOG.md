@@ -60,7 +60,8 @@ benefits question).
    `Get-Content -Encoding UTF8 runs\<folder>\transcript.json`,
    `Get-Content runs\<folder>\action_log.json`,
    `Get-Content runs\<folder>\problems.json`
-8. Fill in `REVIEW.md` with event IDs (E…) and message IDs (M…).
+8. Fill in `REVIEW.md` with event IDs (E…) and message IDs (M…). Claude can draft
+   it from the three files; the draft is saved as `reviews/runN_REVIEW.md` on GitHub.
 9. Add a row for the run to the table below (short summary only).
 10. Back up the `runs\` folder somewhere safe (it is not on GitHub).
 11. Check the real cost in the Anthropic Console (Billing).
@@ -87,6 +88,8 @@ the portal; the **transcript** says what was said. Do not guess intent.
   behaviour.
 
 ## Runs so far
+
+Full review sheets (drafts to check): `reviews/run1_REVIEW.md`, `reviews/run2_REVIEW.md`.
 
 | Run | Folder | Status | Est. cost | Residence | Benefits address | Asked first? | Staff tool | Completion message said | Next letter | Learned only from follow-up |
 |---|---|---|---|---|---|---|---|---|---|---|
