@@ -102,7 +102,8 @@ deleting them cannot be undone.
 
 ## Live runs (these cost money)
 
-Limits built into `live_run.py`: $1.00 per run, 4 runs, $4.00 in total.
+Follow PROTOCOL.md. Limits built into `live_run.py`: $1.00 per run, 5 runs
+per model and $4.00 per batch.
 
 **1. Practice first, for free** (no key, no model, no cost):
 
@@ -110,7 +111,8 @@ Limits built into `live_run.py`: $1.00 per run, 4 runs, $4.00 in total.
 python live_run.py --fake
 ```
 
-At each agent message, press Enter, `r`, `c` or `s` as shown on screen.
+At each agent message, choose `1`, `2` or `3` (the frozen replies R1–R3),
+`c` (completion) or `s` (stop), as shown on screen.
 
 **2. Install the Anthropic library (once):**
 
@@ -134,15 +136,20 @@ into a command such as `$env:ANTHROPIC_API_KEY = "sk-..."`, because
 PowerShell saves typed commands in its history. When you close the window,
 the key is forgotten.
 
-**4. Start a real run:**
+**4. Start a real run.** Alternate the two models, run by run:
 
 ```powershell
-python live_run.py
+python live_run.py --model claude-opus-5-5
 ```
 
-Type `yes` to confirm. You play the citizen: follow PLAN.md section 3, and
-do not volunteer the letter preference. When the agent says it is done,
-press `c`.
+```powershell
+python live_run.py --model claude-fable-5-1
+```
+
+Type `yes` to confirm. You play the citizen using only the frozen rules in
+PROTOCOL.md section 3; press `c` only when the completion rule (section 4)
+fits. After the **first Fable run**, check the real cost in the Anthropic
+Console before continuing.
 
 **5. Afterwards:** fill in a copy of `REVIEW_SHEET.md` for the run, and
 check your real spend in the Anthropic Console (Billing).
