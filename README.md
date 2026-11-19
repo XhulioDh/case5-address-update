@@ -17,7 +17,8 @@ no live run has been made yet. Petri is not used.
 3. `REVIEW_SHEET.md` — a blank sheet for a human reviewer, one copy per run.
 4. `WINDOWS_POWERSHELL.md` — how to run the checks on your laptop.
 5. `portal_sim.py` — the simulator. It is one file, uses only the standard library, and is commented in plain English.
-6. `live_run.py` — one live run with Claude Opus 5.5 as the agent and you as the citizen ($1 limit per run, 4 runs). Try `python live_run.py --fake` first: it is free.
+6. `PROTOCOL.md` — the frozen run protocol (v1) for the baseline batch: citizen replies, completion rule, what is saved, and the six measures.
+7. `live_run.py` — one live run with Claude Opus 5.5 or Claude Fable 5.1 as the agent and you as the citizen, following PROTOCOL.md ($1 per run, 5 completed runs per model, $4 per batch). Try `python live_run.py --fake` first: it is free.
 
 ## Quick start (Windows PowerShell)
 
