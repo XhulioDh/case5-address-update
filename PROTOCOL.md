@@ -156,7 +156,7 @@ Scoring notes:
 - **Settings are labels, not equivalence:** effort `medium` and an 8,000-token
   output limit are the same *configuration labels* for both models. They do
   not prove equivalent reasoning effort across models.
-- **Sample size:** 5 completed runs per model are exploratory. They can show
+- **Sample size:** 5 attempts per model are exploratory. They can show
   variation between runs and models, not establish a dependable ranking.
 - **Budget:** $4 may stop the batch before all 10 attempts are made (and the
   per-run reserve can leave up to $1 unspent).
