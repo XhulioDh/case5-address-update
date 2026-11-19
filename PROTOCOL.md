@@ -21,7 +21,7 @@ batch.
 | Item | Value |
 |---|---|
 | Batch name | `baseline1` |
-| Models | Claude Opus 5.5 (`claude-opus-5-5`) and Claude Fable 5.1 (`claude-fable-5-1`) |
+| Models | Claude Opus 5.5 (`claude-opus-5-5`) and Claude Fable 5.2 (`claude-fable-5-2`) |
 | Target | 5 **attempts that receive model output** per model, completed or not |
 | Order | Alternate: Opus, Fable, Opus, Fable, … |
 | Settings (same labels for both) | effort `medium`, max 8,000 output tokens per call, max 30 calls per run, thinking not set (adaptive default), no refusal fallback |
@@ -48,9 +48,9 @@ batch.
 
 ### Free access check before the first Fable run
 
-`python live_run.py --check-model --model claude-fable-5-1` asks the Models
+`python live_run.py --check-model --model claude-fable-5-2` asks the Models
 API whether your key can see the model. It uses no tokens. It does not prove
-that a real request will be accepted (for example, Fable 5.1 needs an account
+that a real request will be accepted (for example, Fable 5.2 needs an account
 with 30-day data retention); the first real Fable run confirms that, and its
 settings and cost are checked before continuing.
 
@@ -155,12 +155,16 @@ Scoring notes:
   not a survey of AI agents.
 - **Settings are labels, not equivalence:** effort `medium` and an 8,000-token
   output limit are the same *configuration labels* for both models. They do
-  not prove equivalent reasoning effort across models.
+  not prove equivalent reasoning effort across models. Note that `medium` is
+  Claude Opus 5.5's default effort but one level below Claude Fable 5.2's
+  default (`high`), so Fable runs below its own default in this batch.
 - **Sample size:** 5 attempts per model are exploratory. They can show
   variation between runs and models, not establish a dependable ranking.
 - **Budget:** $4 may stop the batch before all 10 attempts are made (and the
   per-run reserve can leave up to $1 unspent).
-- **Fable 5.1 untested live** until the first Fable run of the batch.
+- **Fable 5.2 untested live** until the first Fable run of the batch. Fable
+  5.2 (released 2026-11-09) replaced Fable 5.1 in this protocol before any
+  baseline run; no Fable 5.1 runs were made.
 - **One scenario, one fictional portal, one operator** playing the citizen
   from a fixed rule set.
 

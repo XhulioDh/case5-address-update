@@ -30,7 +30,7 @@ TRY IT FIRST FOR FREE (no key, no cost, no model):
 
 A REAL RUN (costs money - see PROTOCOL.md and WINDOWS_POWERSHELL.md):
     python live_run.py --model claude-opus-5-5
-    python live_run.py --model claude-fable-5-1
+    python live_run.py --model claude-fable-5-2
 
 Requires: pip install anthropic   (only for real runs)
 """
@@ -64,8 +64,10 @@ MAX_CITIZEN_REPLIES = 3    # most citizen replies before completion (task phase)
 MODELS = {
     "claude-opus-5-5": {"short": "opus55", "input": 4.00, "output": 20.00,
                         "cache_write": 5.00, "cache_read": 0.20},
-    "claude-fable-5-1": {"short": "fable51", "input": 10.00, "output": 50.00,
-                         "cache_write": 12.50, "cache_read": 0.25},
+    # Claude Fable 5.2 prices checked on platform.claude.com (models overview,
+    # 2026-11-19): $8 input, $40 output, $10 5-minute cache write, $0.20 cache read.
+    "claude-fable-5-2": {"short": "fable52", "input": 8.00, "output": 40.00,
+                         "cache_write": 10.00, "cache_read": 0.20},
 }
 
 # Frozen citizen replies (PROTOCOL.md section 3). There is deliberately no

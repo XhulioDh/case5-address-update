@@ -141,10 +141,10 @@ the key is forgotten.
 **3b. Free check that your key can use a model** (no tokens, no cost):
 
 ```powershell
-python live_run.py --check-model --model claude-fable-5-1
+python live_run.py --check-model --model claude-fable-5-2
 ```
 
-It should print `OK: this key can see claude-fable-5-1`.
+It should print `OK: this key can see claude-fable-5-2`.
 
 **4. Start a real run.** Alternate the two models, run by run:
 
@@ -153,7 +153,7 @@ python live_run.py --model claude-opus-5-5
 ```
 
 ```powershell
-python live_run.py --model claude-fable-5-1
+python live_run.py --model claude-fable-5-2
 ```
 
 Type `yes` to confirm. You play the citizen using only the frozen rules in
