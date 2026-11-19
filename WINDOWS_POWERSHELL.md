@@ -103,7 +103,8 @@ deleting them cannot be undone.
 ## Live runs (these cost money)
 
 Follow PROTOCOL.md. Limits built into `live_run.py`: $1.00 per run, 5
-completed runs per model and $4.00 per batch.
+attempts per model (attempts where the model replied, completed or not) and
+$4.00 per batch.
 
 **1. Practice first, for free** (no key, no model, no cost):
 
@@ -137,6 +138,14 @@ into a command such as `$env:ANTHROPIC_API_KEY = "sk-..."`, because
 PowerShell saves typed commands in its history. When you close the window,
 the key is forgotten.
 
+**3b. Free check that your key can use a model** (no tokens, no cost):
+
+```powershell
+python live_run.py --check-model --model claude-fable-5-2
+```
+
+It should print `OK: this key can see claude-fable-5-2`.
+
 **4. Start a real run.** Alternate the two models, run by run:
 
 ```powershell
@@ -144,7 +153,7 @@ python live_run.py --model claude-opus-5-5
 ```
 
 ```powershell
-python live_run.py --model claude-fable-5-1
+python live_run.py --model claude-fable-5-2
 ```
 
 Type `yes` to confirm. You play the citizen using only the frozen rules in

@@ -16,10 +16,12 @@ COST SAFETY
     * Each run stops before any call that could take it past --max-dollars
       (default $1.00). The check is deliberately cautious.
     * Within a batch, the script refuses to start once a model already has
-      --complete-runs-per-model COMPLETED runs (default 5), or if the next
-      run could take the batch past --total-budget (default $4.00). Stopped
-      runs, refusals and errors stay in the record and count toward the
-      budget, but not toward the completed runs.
+      --attempts-per-model attempts that received model output (default 5),
+      completed or not, or if the next run could take the batch past
+      --total-budget (default $4.00). Attempts with no model response (e.g.
+      a key error) cost nothing and are listed separately, not counted.
+    * The batch check reserves the full --max-dollars for the next run, so
+      a batch can end with up to that amount unspent.
     * Cost figures are ESTIMATES from token counts and the price table below.
       Your Anthropic Console billing page is the real figure.
 
@@ -28,7 +30,7 @@ TRY IT FIRST FOR FREE (no key, no cost, no model):
 
 A REAL RUN (costs money - see PROTOCOL.md and WINDOWS_POWERSHELL.md):
     python live_run.py --model claude-opus-5-5
-    python live_run.py --model claude-fable-5-1
+    python live_run.py --model claude-fable-5-2
 
 Requires: pip install anthropic   (only for real runs)
 """
@@ -50,7 +52,7 @@ import portal_sim as sim
 # Settings (frozen for protocol v1 - the same for every model)
 # --------------------------------------------------------------------------
 
-PROTOCOL_VERSION = "v1"
+PROTOCOL_VERSION = "v1.1"
 DEFAULT_BATCH = "baseline1"
 EFFORT = "medium"          # same explicit effort for every model
 MAX_TOKENS = 8000          # most output one call may produce
@@ -62,8 +64,10 @@ MAX_CITIZEN_REPLIES = 3    # most citizen replies before completion (task phase)
 MODELS = {
     "claude-opus-5-5": {"short": "opus55", "input": 4.00, "output": 20.00,
                         "cache_write": 5.00, "cache_read": 0.20},
-    "claude-fable-5-1": {"short": "fable51", "input": 10.00, "output": 50.00,
-                         "cache_write": 12.50, "cache_read": 0.25},
+    # Claude Fable 5.2 prices checked on platform.claude.com (models overview,
+    # 2026-11-19): $8 input, $40 output, $10 5-minute cache write, $0.20 cache read.
+    "claude-fable-5-2": {"short": "fable52", "input": 8.00, "output": 40.00,
+                         "cache_write": 10.00, "cache_read": 0.20},
 }
 
 # Frozen citizen replies (PROTOCOL.md section 3). There is deliberately no
@@ -329,12 +333,13 @@ def preflight(args, prices):
     mine = [r for r in with_output if r["model"] == args.model]
     completed = [r for r in mine if r["status"] == "complete"]
     print(f"Batch '{args.batch}': estimated spend ${spent:.2f} of ${args.total_budget:.2f}.")
-    print(f"  {args.model}: {len(completed)} of {args.complete_runs_per_model} completed runs; "
-          f"{len(mine) - len(completed)} other attempts with model output (kept in the record).")
+    print(f"  {args.model}: {len(mine)} of {args.attempts_per_model} attempts used "
+          f"(completed {len(completed)} of {len(mine)}).")
     if no_response:
-        print(f"  Attempts with no model response (e.g. key errors), tracked separately: {len(no_response)}")
-    if len(completed) >= args.complete_runs_per_model:
-        print("Stopping: this model already has all its completed runs. Nothing was sent.")
+        print(f"  Attempts with no model response (e.g. key errors), not counted: {len(no_response)}")
+    if len(mine) >= args.attempts_per_model:
+        print(f"Stopping: this model already has {args.attempts_per_model} attempts "
+              "with model output. Nothing was sent.")
         return False
     if spent + args.max_dollars > args.total_budget:
         print("Stopping: another run could pass the batch budget. Nothing was sent.")
@@ -355,6 +360,28 @@ def preflight(args, prices):
 # --------------------------------------------------------------------------
 # One run
 # --------------------------------------------------------------------------
+
+def check_model(args):
+    """Ask the Models API whether this key can see the model. Uses no tokens."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        print("ANTHROPIC_API_KEY is not set. See WINDOWS_POWERSHELL.md, section 'Live runs'.")
+        return 2
+    import anthropic
+    try:
+        info = anthropic.Anthropic().models.retrieve(args.model)
+    except anthropic.AuthenticationError:
+        print("The key was rejected (authentication error). Check or recreate the key.")
+        return 1
+    except (anthropic.NotFoundError, anthropic.PermissionDeniedError) as exc:
+        print(f"This key cannot use {args.model}: {type(exc).__name__}.")
+        return 1
+    except anthropic.APIConnectionError:
+        print("Could not reach the API (network problem).")
+        return 1
+    print(f"OK: this key can see {info.id} ({getattr(info, 'display_name', '')}).")
+    print("This check used no tokens. The first real run will confirm that requests are accepted.")
+    return 0
+
 
 def run(args):
     prices = MODELS[args.model]
@@ -518,14 +545,18 @@ def main(argv=None):
                    help="target model (default claude-opus-5-5)")
     p.add_argument("--batch", default=DEFAULT_BATCH, help=f"batch name (default {DEFAULT_BATCH})")
     p.add_argument("--max-dollars", type=float, default=1.00, help="limit for this run (default 1.00)")
-    p.add_argument("--complete-runs-per-model", type=int, default=5,
-                   help="completed runs needed per model in a batch (default 5)")
+    p.add_argument("--attempts-per-model", type=int, default=5,
+                   help="attempts with model output per model in a batch (default 5)")
+    p.add_argument("--check-model", action="store_true",
+                   help="free check that your key can see --model (no tokens used), then exit")
     p.add_argument("--total-budget", type=float, default=4.00, help="limit for the batch (default 4.00)")
     args = p.parse_args(argv)
     try:
         sys.stdout.reconfigure(errors="replace")
     except AttributeError:
         pass
+    if args.check_model:
+        return check_model(args)
     return run(args)
 
 
