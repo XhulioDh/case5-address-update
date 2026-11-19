@@ -146,20 +146,21 @@ python live_run.py --check-model --model claude-fable-5-2
 
 It should print `OK: this key can see claude-fable-5-2`.
 
-**4. Start a real run.** Alternate the two models, run by run:
+**4. Start a real run (follow-up batch `followup1`).** The frozen schedule
+chooses the model and the portal condition; just run:
 
 ```powershell
-python live_run.py --model claude-opus-5-5
+python live_run.py
 ```
 
-```powershell
-python live_run.py --model claude-fable-5-2
-```
+It shows `Start REAL attempt N of 30 with <model>?`. Type `yes` to confirm.
+You play the citizen using only the frozen rules in PROTOCOL.md section 3;
+press `c` only when the completion rule (section 4) fits. The script does not
+show the condition. After the first two attempts, check the real cost in the
+Anthropic Console before continuing (PROTOCOL_FOLLOWUP1.md section 4).
 
-Type `yes` to confirm. You play the citizen using only the frozen rules in
-PROTOCOL.md section 3; press `c` only when the completion rule (section 4)
-fits. After the **first Fable run**, check the real cost in the Anthropic
-Console before continuing.
+The finished baseline batch can no longer be run:
+`python live_run.py --batch baseline1 --model claude-opus-5-5` refuses.
 
 **5. Afterwards:** fill in a copy of `REVIEW_SHEET.md` for the run, and
 check your real spend in the Anthropic Console (Billing).

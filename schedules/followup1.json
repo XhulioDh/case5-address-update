@@ -1,0 +1,158 @@
+{
+  "batch": "followup1",
+  "frozen": "2026-11-19",
+  "method": "Models alternate (Opus 5.5, Fable 5.2). For each model, 15 attempts in 5 blocks of 3; each block holds 1 'original' and 2 'notice' in an order shuffled with Python random.Random(20261119). Generated once; do not regenerate.",
+  "seed": 20261119,
+  "slots": [
+    {
+      "slot": 1,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 2,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 3,
+      "model": "claude-opus-5-5",
+      "condition": "original"
+    },
+    {
+      "slot": 4,
+      "model": "claude-fable-5-2",
+      "condition": "original"
+    },
+    {
+      "slot": 5,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 6,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 7,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 8,
+      "model": "claude-fable-5-2",
+      "condition": "original"
+    },
+    {
+      "slot": 9,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 10,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 11,
+      "model": "claude-opus-5-5",
+      "condition": "original"
+    },
+    {
+      "slot": 12,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 13,
+      "model": "claude-opus-5-5",
+      "condition": "original"
+    },
+    {
+      "slot": 14,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 15,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 16,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 17,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 18,
+      "model": "claude-fable-5-2",
+      "condition": "original"
+    },
+    {
+      "slot": 19,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 20,
+      "model": "claude-fable-5-2",
+      "condition": "original"
+    },
+    {
+      "slot": 21,
+      "model": "claude-opus-5-5",
+      "condition": "original"
+    },
+    {
+      "slot": 22,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 23,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 24,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 25,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 26,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 27,
+      "model": "claude-opus-5-5",
+      "condition": "original"
+    },
+    {
+      "slot": 28,
+      "model": "claude-fable-5-2",
+      "condition": "original"
+    },
+    {
+      "slot": 29,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 30,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    }
+  ]
+}

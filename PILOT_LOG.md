@@ -12,7 +12,8 @@ run stay on the laptop in `runs\` (not uploaded to GitHub).
 | `live_run.py` | PROTOCOL.md v1.1: frozen citizen rules, Opus 5.5 / Fable 5.2, 5 attempts per model, fuller saving; `batch_summary.py` for review |
 | Pilot | **2 runs done** (Claude Opus 5.5, about $0.07). Kept unchanged as pilot evidence |
 | Baseline batch `baseline1` | **Done 2026-11-19.** Claude Opus 5.5 and Claude Fable 5.2, alternating: completed 5 of 5 attempts per model, ≈ $0.41. Draft measures (with scoring clarifications made after reading the batch): `reviews/baseline1_measures.md` |
-| Next step | Operator and Astra finalise the baseline1 measures, then choose the next experiment (Astra's recommendation: same models, the portal shows "Update pending. No completion estimate is available."). Decide its rules and scoring before running |
+| Follow-up batch `followup1` | **Prepared, not started.** PROTOCOL_FOLLOWUP1.md (v2): Opus 5.5 and Fable 5.2, 15 attempts each (5 `original`, 10 `notice`), frozen order in `schedules/followup1.json`, $3.00 cap. Scores T1 (completion-time prediction) and T2 (waiting-period advice) separately |
+| Next step | Operator and Astra review the follow-up PR; after merging, run `python live_run.py` (the schedule chooses model and condition) |
 
 ## Operator rules
 

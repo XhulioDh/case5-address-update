@@ -28,9 +28,14 @@ COST SAFETY
 TRY IT FIRST FOR FREE (no key, no cost, no model):
     python live_run.py --fake
 
-A REAL RUN (costs money - see PROTOCOL.md and WINDOWS_POWERSHELL.md):
-    python live_run.py --model claude-opus-5-5
-    python live_run.py --model claude-fable-5-2
+A REAL RUN (costs money - see PROTOCOL_FOLLOWUP1.md and WINDOWS_POWERSHELL.md):
+    python live_run.py
+        (batch followup1: the frozen schedule chooses the model and the
+        portal condition of each attempt; the condition is not shown)
+    python live_run.py --batch baseline1 --model claude-opus-5-5
+        (the finished baseline batch; the script refuses further attempts)
+
+PRACTICE (free): python live_run.py --fake --condition notice
 
 Requires: pip install anthropic   (only for real runs)
 """
@@ -52,8 +57,15 @@ import portal_sim as sim
 # Settings (frozen for protocol v1 - the same for every model)
 # --------------------------------------------------------------------------
 
-PROTOCOL_VERSION = "v1.1"
-DEFAULT_BATCH = "baseline1"
+# Each batch has its own frozen protocol. A batch with a schedule decides the
+# model AND the portal condition of every attempt, in a fixed order.
+BATCHES = {
+    "baseline1": {"protocol": "v1.1", "schedule": None,
+                  "attempts_per_model": 5, "total_budget": 4.00},
+    "followup1": {"protocol": "v2", "schedule": "schedules/followup1.json",
+                  "attempts_per_model": None, "total_budget": 3.00},
+}
+DEFAULT_BATCH = "followup1"
 EFFORT = "medium"          # same explicit effort for every model
 MAX_TOKENS = 8000          # most output one call may produce
 MAX_CALLS = 30             # most model calls in one run
@@ -139,6 +151,8 @@ def batch_runs(batch, base_dir="runs"):
                       "cost": float(meta.get("estimated_cost_usd", 0)),
                       "calls": int(meta.get("model_calls", 0)),
                       "status": meta.get("status"),
+                      "condition": meta.get("condition", "original"),
+                      "slot": meta.get("schedule_slot"),
                       "started_at": meta.get("started_at", "")})
     return found
 
@@ -321,6 +335,57 @@ def operator_choice(agent_text, phase, replies_so_far):
 # Checks before a real run
 # --------------------------------------------------------------------------
 
+def load_schedule(path):
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, path), encoding="utf-8") as fh:
+        return json.load(fh)["slots"]
+
+
+def preflight_scheduled(args, config):
+    """For a batch with a frozen schedule: return the next slot, or None.
+
+    The next slot is decided by how many attempts with model output the
+    batch already has. Attempts with no model response do not use a slot.
+    The operator is not shown the portal condition.
+    """
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        print("ANTHROPIC_API_KEY is not set. See WINDOWS_POWERSHELL.md, section 'Live runs'.")
+        return None
+    slots = load_schedule(config["schedule"])
+    earlier = batch_runs(args.batch)
+    with_output = sorted([r for r in earlier if r["calls"] > 0],
+                         key=lambda r: (r["slot"] is None, r["slot"] or 0, r["started_at"]))
+    no_response = [r for r in earlier if r["calls"] == 0]
+    spent = sum(r["cost"] if r["cost"] is not None else args.max_dollars for r in earlier)
+    done = [(r["slot"], r["model"], r["condition"]) for r in with_output]
+    planned = [(s["slot"], s["model"], s["condition"]) for s in slots[:len(done)]]
+    if done != planned:
+        print("Stopping: the attempts saved so far do not match the frozen schedule.")
+        print("Nothing was sent. Check runs\\ and PROTOCOL_FOLLOWUP1.md before continuing.")
+        return None
+    print(f"Batch '{args.batch}': {len(done)} of {len(slots)} scheduled attempts done; "
+          f"estimated spend ${spent:.2f} of ${args.total_budget:.2f}.")
+    if no_response:
+        print(f"  Attempts with no model response (e.g. key errors), not counted: {len(no_response)}")
+    if len(done) >= len(slots):
+        print("Stopping: every scheduled attempt is done. Nothing was sent.")
+        return None
+    slot = slots[len(done)]
+    if args.model and args.model != slot["model"]:
+        print(f"Stopping: the schedule says attempt {slot['slot']} uses {slot['model']}, "
+              f"not {args.model}. Nothing was sent.")
+        return None
+    if spent + args.max_dollars > args.total_budget:
+        print("Stopping: another run could pass the batch budget. Nothing was sent.")
+        return None
+    answer = ask(f"Start REAL attempt {slot['slot']} of {len(slots)} with {slot['model']}? "
+                 f"It can cost up to ${args.max_dollars:.2f}. Type yes: ")
+    if answer.strip().lower() != "yes":
+        print("Cancelled. Nothing was sent.")
+        return None
+    return slot
+
+
 def preflight(args, prices):
     """Return True if a real run may start (limits, alternation, confirmation)."""
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -384,20 +449,34 @@ def check_model(args):
 
 
 def run(args):
-    prices = MODELS[args.model]
+    config = BATCHES[args.batch]
+    slot = None
     if args.fake:
+        args.model = args.model or "claude-opus-5-5"
+        condition = args.condition
         client = FakeClient()
         label, batch = "fake", "fake"
-        print(FAKE_LABEL)
+        print(FAKE_LABEL + f" (condition: {condition})")
     else:
-        if not preflight(args, prices):
-            return 3
+        if config["schedule"]:
+            slot = preflight_scheduled(args, config)
+            if slot is None:
+                return 3
+            args.model, condition = slot["model"], slot["condition"]
+        else:
+            if not args.model:
+                print("Please give --model for this batch.")
+                return 2
+            if not preflight(args, MODELS[args.model]):
+                return 3
+            condition = "original"
         import anthropic  # only needed for real runs
         client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
-        label, batch = f"live-{args.batch}-{prices['short']}", args.batch
+        label, batch = f"live-{args.batch}-{MODELS[args.model]['short']}", args.batch
+    prices = MODELS[args.model]
 
     started_at = datetime.datetime.now().isoformat(timespec="seconds")
-    portal = sim.Portal(label)
+    portal = sim.Portal(label, condition=condition)
     portal.add_message("citizen", sim.INITIAL_CITIZEN_REQUEST, source="fixed_script")
     messages = [{"role": "user", "content": sim.INITIAL_CITIZEN_REQUEST}]
     tools = tool_definitions()
@@ -509,8 +588,10 @@ def run(args):
         folder = portal.save()
         meta = {
             "label": FAKE_LABEL if args.fake else "LIVE RUN - real model output",
-            "protocol_version": PROTOCOL_VERSION,
+            "protocol_version": "fake" if args.fake else config["protocol"],
             "batch": batch,
+            "condition": condition,
+            "schedule_slot": slot["slot"] if slot else None,
             "model": None if args.fake else args.model,
             "served_models": sorted({c["served_model"] for c in calls if c["served_model"]}),
             "effort": EFFORT, "max_tokens": MAX_TOKENS, "max_calls": MAX_CALLS,
@@ -541,21 +622,33 @@ def run(args):
 def main(argv=None):
     p = argparse.ArgumentParser(description="One live run of the address-update pilot.")
     p.add_argument("--fake", action="store_true", help="practice run: no key, no model, no cost")
-    p.add_argument("--model", choices=sorted(MODELS), default="claude-opus-5-5",
-                   help="target model (default claude-opus-5-5)")
-    p.add_argument("--batch", default=DEFAULT_BATCH, help=f"batch name (default {DEFAULT_BATCH})")
+    p.add_argument("--model", choices=sorted(MODELS), default=None,
+                   help="target model (scheduled batches choose it; optional check)")
+    p.add_argument("--batch", choices=sorted(BATCHES), default=DEFAULT_BATCH,
+                   help=f"batch name (default {DEFAULT_BATCH})")
+    p.add_argument("--condition", choices=sim.CONDITIONS, default="original",
+                   help="portal condition for --fake practice runs only")
     p.add_argument("--max-dollars", type=float, default=1.00, help="limit for this run (default 1.00)")
-    p.add_argument("--attempts-per-model", type=int, default=5,
-                   help="attempts with model output per model in a batch (default 5)")
+    p.add_argument("--attempts-per-model", type=int, default=None,
+                   help="attempts per model, for batches without a schedule (baseline1: 5)")
     p.add_argument("--check-model", action="store_true",
                    help="free check that your key can see --model (no tokens used), then exit")
-    p.add_argument("--total-budget", type=float, default=4.00, help="limit for the batch (default 4.00)")
+    p.add_argument("--total-budget", type=float, default=None,
+                   help="limit for the batch (followup1: 3.00, baseline1: 4.00)")
     args = p.parse_args(argv)
+    config = BATCHES[args.batch]
+    if args.total_budget is None:
+        args.total_budget = config["total_budget"]
+    if args.attempts_per_model is None:
+        args.attempts_per_model = config["attempts_per_model"]
     try:
         sys.stdout.reconfigure(errors="replace")
     except AttributeError:
         pass
     if args.check_model:
+        if not args.model:
+            print("Please give --model with --check-model.")
+            return 2
         return check_model(args)
     return run(args)
 
