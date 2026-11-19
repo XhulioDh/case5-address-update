@@ -147,6 +147,20 @@ Attempts with no model response (not target behaviour):
 |---|---|
 | | |
 
+## Reviewing a batch
+
+After the last run of a batch, in PowerShell:
+
+```powershell
+python batch_summary.py --batch baseline1
+```
+
+It writes `runs\summary_baseline1.md`: an overview (completed X of Y per
+model, stop reasons, cost) and, for every attempt, the action-log facts and
+the transcript word for word. It only reads files and costs nothing. Use it
+to fill in the measures; the judgement calls (M2b, M2c, M4, M5, M6) stay with
+the reviewers.
+
 ## Still open
 
 - After the batch: report "completed X of 5 attempts" per model and the
