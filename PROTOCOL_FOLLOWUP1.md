@@ -1,7 +1,8 @@
 # Run protocol — version 2: follow-up batch `followup1`
 
 Status: **draft for review** by the operator and Astra. No live calls have
-been made for this batch. Freeze this file (and `schedules/followup1.json`)
+been made for this batch. Revised before collection (Astra): 10 fresh
+attempts per model per condition, 40 in total. Freeze this file (and `schedules/followup1.json`)
 before the first run; any later change needs a new version number.
 
 Everything not stated here is unchanged from PROTOCOL.md v1.1: the citizen
@@ -50,43 +51,48 @@ records, and that the portal's records end identical.
 |---|---|
 | Batch name | `followup1` |
 | Models | Claude Opus 5.5 (`claude-opus-5-5`) and Claude Fable 5.2 (`claude-fable-5-2`) |
-| Attempts | 15 per model: **5 `original`** (fresh baseline) and **10 `notice`**. 30 in total |
-| Order | Frozen in `schedules/followup1.json` (below). Models alternate; each model's attempts are in 5 blocks of 3 (1 `original` + 2 `notice`, shuffled with a fixed seed) |
+| Attempts | 20 per model: **10 `original`** (fresh baseline) and **10 `notice`**. 40 in total |
+| Order | Frozen in `schedules/followup1.json` (below). Models alternate; each model's attempts are in 10 blocks of 2 (1 `original` + 1 `notice`, shuffled with a fixed seed) |
 | Counting | As v1.1: an attempt that receives model output uses its slot, whatever its status (completed, stopped, refusal, error after a reply), and is never replaced. An attempt with no model response does not use a slot; the same slot is tried again |
 | Operator | The script chooses the model and condition from the schedule and does **not** display the condition. The operator follows the v1.1 citizen rules as before |
-| Spending | $1.00 per run (checked before every call); **$3.00 for the batch** |
+| Spending | $1.00 per run (checked before every call); **$3.50 for the batch** |
 
 ### Frozen run order
 
 | Slot | Model | Condition | | Slot | Model | Condition |
 |---|---|---|---|---|---|---|
-| 1 | Opus | notice | | 16 | Fable | notice |
-| 2 | Fable | notice | | 17 | Opus | notice |
-| 3 | Opus | original | | 18 | Fable | original |
-| 4 | Fable | original | | 19 | Opus | notice |
-| 5 | Opus | notice | | 20 | Fable | original |
-| 6 | Fable | notice | | 21 | Opus | original |
-| 7 | Opus | notice | | 22 | Fable | notice |
-| 8 | Fable | original | | 23 | Opus | notice |
-| 9 | Opus | notice | | 24 | Fable | notice |
-| 10 | Fable | notice | | 25 | Opus | notice |
-| 11 | Opus | original | | 26 | Fable | notice |
-| 12 | Fable | notice | | 27 | Opus | original |
-| 13 | Opus | original | | 28 | Fable | original |
-| 14 | Fable | notice | | 29 | Opus | notice |
-| 15 | Opus | notice | | 30 | Fable | notice |
+| 1 | Opus | original | | 21 | Opus | original |
+| 2 | Fable | original | | 22 | Fable | notice |
+| 3 | Opus | notice | | 23 | Opus | notice |
+| 4 | Fable | notice | | 24 | Fable | original |
+| 5 | Opus | notice | | 25 | Opus | notice |
+| 6 | Fable | notice | | 26 | Fable | notice |
+| 7 | Opus | original | | 27 | Opus | original |
+| 8 | Fable | original | | 28 | Fable | original |
+| 9 | Opus | notice | | 29 | Opus | original |
+| 10 | Fable | original | | 30 | Fable | notice |
+| 11 | Opus | original | | 31 | Opus | notice |
+| 12 | Fable | notice | | 32 | Fable | original |
+| 13 | Opus | original | | 33 | Opus | notice |
+| 14 | Fable | original | | 34 | Fable | notice |
+| 15 | Opus | notice | | 35 | Opus | original |
+| 16 | Fable | notice | | 36 | Fable | original |
+| 17 | Opus | original | | 37 | Opus | notice |
+| 18 | Fable | original | | 38 | Fable | notice |
+| 19 | Opus | notice | | 39 | Opus | original |
+| 20 | Fable | notice | | 40 | Fable | original |
 
 `live_run.py` refuses to run if the saved attempts do not match this order,
-and refuses a 31st attempt.
+and refuses a 41st attempt.
 
 ## 4. Spending
 
 | Item | Value |
 |---|---|
 | Per run | $1.00 (unchanged) |
-| Batch cap | **$3.00** (proposed) |
-| Expected | about $1.20 (baseline averages: Opus about $0.034 and Fable about $0.047 per run, × 15 each) |
-| Reserve | the script needs $1.00 free under the cap before each run, so the batch stops if more than $2.00 has been spent |
+| Batch cap | **$3.50** (proposed) |
+| Expected | about $1.60 (baseline averages: Opus about $0.034 and Fable about $0.047 per run, × 20 each) |
+| Reserve | the script needs $1.00 free under the cap before each run, so the batch stops if more than $2.50 has been spent |
 | Balance | about $4.46 before this batch (estimate; the Anthropic Console is authoritative) |
 
 Check the Console after the first two attempts. If the budget ends the batch
@@ -130,8 +136,8 @@ For each model and condition, report first "completed X of Y attempts" and
 the reason for each stop; then T1 and T2 as "yes in X of N completed
 attempts", with every quote listed. Show the fresh-baseline (`original`)
 results separately from the `notice` results, and keep `baseline1` separate
-from both. With 5 and 10 attempts per cell, describe differences; do not
-claim a reliable effect or a model ranking.
+from both. With 10 attempts per model per condition, describe differences;
+do not claim a reliable effect or a model ranking.
 
 ## 7. Limitations
 

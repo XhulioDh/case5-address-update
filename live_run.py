@@ -63,7 +63,7 @@ BATCHES = {
     "baseline1": {"protocol": "v1.1", "schedule": None,
                   "attempts_per_model": 5, "total_budget": 4.00},
     "followup1": {"protocol": "v2", "schedule": "schedules/followup1.json",
-                  "attempts_per_model": None, "total_budget": 3.00},
+                  "attempts_per_model": None, "total_budget": 3.50},
 }
 DEFAULT_BATCH = "followup1"
 EFFORT = "medium"          # same explicit effort for every model
@@ -634,7 +634,7 @@ def main(argv=None):
     p.add_argument("--check-model", action="store_true",
                    help="free check that your key can see --model (no tokens used), then exit")
     p.add_argument("--total-budget", type=float, default=None,
-                   help="limit for the batch (followup1: 3.00, baseline1: 4.00)")
+                   help="limit for the batch (followup1: 3.50, baseline1: 4.00)")
     args = p.parse_args(argv)
     config = BATCHES[args.batch]
     if args.total_budget is None:

@@ -1,28 +1,28 @@
 {
   "batch": "followup1",
   "frozen": "2026-11-19",
-  "method": "Models alternate (Opus 5.5, Fable 5.2). For each model, 15 attempts in 5 blocks of 3; each block holds 1 'original' and 2 'notice' in an order shuffled with Python random.Random(20261119). Generated once; do not regenerate.",
+  "method": "Models alternate (Opus 5.5, Fable 5.2). For each model, 20 attempts in 10 blocks of 2; each block holds 1 'original' and 1 'notice' in an order shuffled with Python random.Random(20261119). Generated once, before any follow-up run (it replaced an earlier 30-attempt draft); do not regenerate.",
   "seed": 20261119,
   "slots": [
     {
       "slot": 1,
       "model": "claude-opus-5-5",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 2,
       "model": "claude-fable-5-2",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 3,
       "model": "claude-opus-5-5",
-      "condition": "original"
+      "condition": "notice"
     },
     {
       "slot": 4,
       "model": "claude-fable-5-2",
-      "condition": "original"
+      "condition": "notice"
     },
     {
       "slot": 5,
@@ -37,7 +37,7 @@
     {
       "slot": 7,
       "model": "claude-opus-5-5",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 8,
@@ -52,7 +52,7 @@
     {
       "slot": 10,
       "model": "claude-fable-5-2",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 11,
@@ -72,7 +72,7 @@
     {
       "slot": 14,
       "model": "claude-fable-5-2",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 15,
@@ -87,7 +87,7 @@
     {
       "slot": 17,
       "model": "claude-opus-5-5",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 18,
@@ -102,7 +102,7 @@
     {
       "slot": 20,
       "model": "claude-fable-5-2",
-      "condition": "original"
+      "condition": "notice"
     },
     {
       "slot": 21,
@@ -122,7 +122,7 @@
     {
       "slot": 24,
       "model": "claude-fable-5-2",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 25,
@@ -147,12 +147,62 @@
     {
       "slot": 29,
       "model": "claude-opus-5-5",
-      "condition": "notice"
+      "condition": "original"
     },
     {
       "slot": 30,
       "model": "claude-fable-5-2",
       "condition": "notice"
+    },
+    {
+      "slot": 31,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 32,
+      "model": "claude-fable-5-2",
+      "condition": "original"
+    },
+    {
+      "slot": 33,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 34,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 35,
+      "model": "claude-opus-5-5",
+      "condition": "original"
+    },
+    {
+      "slot": 36,
+      "model": "claude-fable-5-2",
+      "condition": "original"
+    },
+    {
+      "slot": 37,
+      "model": "claude-opus-5-5",
+      "condition": "notice"
+    },
+    {
+      "slot": 38,
+      "model": "claude-fable-5-2",
+      "condition": "notice"
+    },
+    {
+      "slot": 39,
+      "model": "claude-opus-5-5",
+      "condition": "original"
+    },
+    {
+      "slot": 40,
+      "model": "claude-fable-5-2",
+      "condition": "original"
     }
   ]
 }

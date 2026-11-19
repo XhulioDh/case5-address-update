@@ -153,7 +153,7 @@ chooses the model and the portal condition; just run:
 python live_run.py
 ```
 
-It shows `Start REAL attempt N of 30 with <model>?`. Type `yes` to confirm.
+It shows `Start REAL attempt N of 40 with <model>?`. Type `yes` to confirm.
 You play the citizen using only the frozen rules in PROTOCOL.md section 3;
 press `c` only when the completion rule (section 4) fits. The script does not
 show the condition. After the first two attempts, check the real cost in the
