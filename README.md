@@ -20,6 +20,7 @@ no live run has been made yet. Petri is not used.
 6. `PROTOCOL.md` — the frozen run protocol (v1.1) for the baseline batch: citizen replies, completion rule, what is saved, and the six measures.
 7. `live_run.py` — one live run with Claude Opus 5.5 or Claude Fable 5.2 as the agent and you as the citizen, following PROTOCOL.md ($1 per run, 5 attempts per model, $4 per batch). Try `python live_run.py --fake` first: it is free.
 8. `batch_summary.py` — after a batch, writes one summary file of every run (action-log facts and the transcript word for word) for review. Reads files only; no API calls.
+9. `PROTOCOL_FOLLOWUP1.md` and `schedules/followup1.json` — the follow-up batch (protocol v2): same two models, 40 attempts (10 per model per condition) in a frozen order, comparing the original portal with one that shows "No completion estimate is available." on the pending record.
 
 ## Quick start (Windows PowerShell)
 
