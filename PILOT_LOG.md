@@ -11,8 +11,8 @@ run stay on the laptop in `runs\` (not uploaded to GitHub).
 | Offline simulator and checks | Done; pass on the laptop (Python 3.12.10, use `python`, not `py`) |
 | `live_run.py` | Updated for PROTOCOL.md v1: frozen citizen replies, two models, fuller saving |
 | Pilot | **2 runs done** (Claude Opus 5.5, about $0.07). Kept unchanged as pilot evidence |
-| Baseline batch `baseline1` | **Not started.** Claude Opus 5.5 and Claude Fable 5.1, 5 completed runs each, alternating; $1 per run, $4 for the batch |
-| Before the first baseline run | Astra checks the implementation (PR); operator and Astra approve PROTOCOL.md v1 |
+| Baseline batch `baseline1` | **Not started.** Claude Opus 5.5 and Claude Fable 5.1, 5 attempts with model output each, alternating; $1 per run, $4 for the batch (PROTOCOL.md v1.1) |
+| Before the first baseline run | Free practice run; free Fable access check (`--check-model`) |
 | Next step | Practice once with `python live_run.py --fake`, then baseline run 1 (Opus) |
 
 ## Operator rules
@@ -123,8 +123,8 @@ key): no model calls, $0, not counted.
 
 ## Baseline batch `baseline1` (PROTOCOL.md v1)
 
-Fill in one row per attempt that received model output, in the order made
-(the model order below is the plan; add rows for extra attempts). Never delete
+Fill in one row per attempt that received model output, in the order made.
+Each model gets exactly 5 such attempts; stops count as results. Never delete
 unsuccessful attempts. Attempts with no model response (e.g. key errors) go
 in the separate list underneath. Measures as defined in PROTOCOL.md section 6.
 
@@ -149,7 +149,8 @@ Attempts with no model response (not target behaviour):
 
 ## Still open
 
-- Astra's check of the PROTOCOL.md v1 implementation, then approval.
+- After the batch: report "completed X of 5 attempts" per model and the
+  reason for each stop before any other measure.
 - Astra's acceptance test (to be done together).
 - After the baseline batch: compare per measure and per model, report
   variation (not a ranking); then choose one plausible variation and its

@@ -152,7 +152,7 @@ labelled "Simulator check — not model behaviour."
 |---|---|
 | Target models | **Pilot (runs 1–2):** Claude Opus 5.5. **Baseline batch:** Claude Opus 5.5 and Claude Fable 5.1, same settings for both: effort `medium`, max 8,000 output tokens per call (see PROTOCOL.md) |
 | Auditor / judge models | **Not used.** The pilot runs without Petri (see below) |
-| Number of runs | **Pilot:** 2 runs (kept as pilot evidence). **Baseline batch:** 5 per model, alternating models |
+| Number of runs | **Pilot:** 2 runs (kept as pilot evidence). **Baseline batch:** 5 attempts with model output per model, completed or not, alternating models (PROTOCOL.md v1.1) |
 | Spending limit | **Decided:** $1.00 per run, $4.00 for the baseline batch. Enforced by `live_run.py`; costs are estimates, the Anthropic Console is authoritative |
 | Commands for a live run | `live_run.py` — see WINDOWS_POWERSHELL.md, "Live runs" |
 | Petri custom-target integration | **Not for this pilot.** Petri needs auditor and judge models too, which the budget does not cover |
