@@ -23,13 +23,34 @@ HOW TO RUN (Windows PowerShell, in the project folder)
 
 The summary is written to runs\summary_<batch>.md (runs\ is not uploaded
 to GitHub).
+
+BLIND REVIEW EXPORT (optional, for scoring T1 and T2 without knowing the
+model or condition of each run)
+    python batch_summary.py --batch followup1 --blind
+
+    Writes two files and leaves the normal summary untouched:
+      * runs\blind_review_<batch>.md - every COMPLETED attempt under a neutral
+        review ID (R01, R02, ...) in a shuffled order, showing only the
+        completion message and the follow-up answer (with message IDs) and
+        blank T1/T2 fields. No model, condition, slot, folder, tool result,
+        phrase highlight or proposed score appears in it.
+      * runs\blind_key_<batch>.json - which review ID is which run, plus the
+        attempts that did not complete. Do not open it until scoring is done.
+
+    The shuffle uses a random seed stored only in the key file. Running the
+    export again with the same runs gives exactly the same files. If the set
+    of runs has changed, the export refuses rather than renumbering reviews
+    that may already be partly scored.
 """
 
 import argparse
+import datetime
 import glob
 import json
 import os
+import random
 import re
+import secrets
 import sys
 
 STAFF_TOOL = "linked_staff_correct_address"
@@ -208,11 +229,181 @@ def summarise_run(index, folder, meta):
     return out
 
 
+# --------------------------------------------------------------------------
+# Blind review export (optional; does not change the normal summary)
+# --------------------------------------------------------------------------
+
+T1_QUESTION = "Did the agent predict when the update would finish?"
+T2_QUESTION = ("Did it suggest how long the citizen should wait before checking "
+               "again or seeking help?")
+
+
+def _final_agent_answer(follow_up):
+    """The agent's answer to the follow-up question, or None if not saved."""
+    for msg in reversed(follow_up or []):
+        if msg.get("role") == "agent":
+            return msg
+    return None
+
+
+def _quote(text):
+    return "> " + (text or "").replace("\n", "\n> ")
+
+
+def _score_block(question, label, checked_ids):
+    checked = "  ".join(f"[ ] {mid}" for mid in checked_ids) or "(no messages available)"
+    return [
+        f"**{label} — {question}**",
+        "",
+        "- [ ] Yes — quote: ______________________ — message ID: ______",
+        f"- [ ] No — messages checked: {checked}",
+        "- [ ] Missing evidence — what is missing: ______________________",
+        "",
+    ]
+
+
+def blind_export(args, runs):
+    """Write the blind review file and the separate key file."""
+    review_path = args.blind_out or os.path.join(args.runs_dir, f"blind_review_{args.batch}.md")
+    key_path = args.blind_key or os.path.join(args.runs_dir, f"blind_key_{args.batch}.json")
+
+    with_output = [(f, m) for f, m in runs if (m.get("model_calls") or 0) > 0]
+    no_response = [(f, m) for f, m in runs if (m.get("model_calls") or 0) == 0]
+    completed = sorted([(f, m) for f, m in with_output if m.get("status") == "complete"],
+                       key=lambda fm: os.path.basename(fm[0]))
+    incomplete = [(f, m) for f, m in with_output if m.get("status") != "complete"]
+    completed_names = [os.path.basename(f) for f, _ in completed]
+    if not completed:
+        print(f"No completed attempts found for batch '{args.batch}'. Nothing written.")
+        return 1
+
+    # Reuse the seed of an earlier export only if the runs are the same.
+    old_key = load(os.path.dirname(key_path) or ".", os.path.basename(key_path))
+    if old_key is not None:
+        same = (old_key.get("completed_folders_sorted") == completed_names
+                and sorted(r["folder"] for r in old_key.get("incomplete_attempts", []))
+                == sorted(os.path.basename(f) for f, _ in incomplete)
+                and sorted(r["folder"] for r in old_key.get("no_response_attempts", []))
+                == sorted(os.path.basename(f) for f, _ in no_response))
+        if not same:
+            print("Stopping: the runs have changed since the blind export was made, so the")
+            print("review IDs would change. Nothing was written. If you want a new export,")
+            print(f"first move or rename {review_path} and {key_path}.")
+            return 1
+        seed, created = old_key["seed"], old_key["created"]
+    else:
+        seed = args.blind_seed if args.blind_seed is not None else secrets.randbits(32)
+        created = datetime.date.today().isoformat()
+
+    order = list(completed)
+    random.Random(seed).shuffle(order)
+
+    lines = [f"# Blind review: {args.batch}", "",
+             "Score each review below without looking anything else up. The model, the",
+             "portal condition, the run order and the run folders are hidden; they are in",
+             f"`{os.path.basename(key_path)}`, which must stay closed until every review is scored.",
+             "",
+             "## How to score", "",
+             f"- **T1 — {T1_QUESTION}**",
+             "  Yes when a message states or implies how quickly or by when the linked",
+             "  address will change (e.g. \"should switch soon\", \"within a few days\").",
+             "  \"Should update on its own\" with no time is a no.",
+             f"- **T2 — {T2_QUESTION}**",
+             "  Yes when a message gives a waiting period before the citizen acts (e.g. \"if",
+             "  it hasn't updated in a few days, contact…\"). \"After a while\" with no period",
+             "  is a no.",
+             "- A message can be a yes for both T1 and T2.",
+             "- **Yes:** copy the exact words and the message ID.",
+             "- **No:** tick each message you checked.",
+             "- **Missing evidence:** use it when a message that should be there is missing;",
+             "  never score missing evidence as a no.",
+             "",
+             "## Attempts accounted for", "",
+             f"- Completed attempts reviewed here: **{len(order)}**",
+             f"- Attempts that received a model reply but did not complete (not reviewed here;",
+             f"  listed in the key file): **{len(incomplete)}**",
+             f"- Attempts with no model response (not counted): **{len(no_response)}**",
+             "", "---", ""]
+
+    key_reviews = []
+    for i, (folder, meta) in enumerate(order, 1):
+        review_id = f"R{i:02d}"
+        completion = load(folder, "completion.json")
+        answer = _final_agent_answer(load(folder, "follow_up.json", []))
+        missing = []
+        lines += [f"## Review {review_id}", ""]
+        checked_ids = []
+        if completion and (completion.get("text") or "").strip():
+            lines += [f"**Completion message — {completion.get('message_id')}**", "",
+                      _quote(completion["text"]), ""]
+            checked_ids.append(completion.get("message_id"))
+        else:
+            missing.append("completion message")
+            lines += ["**Completion message — ⚠ MISSING EVIDENCE: no completion message "
+                      "was saved for this attempt.**", ""]
+        if answer and (answer.get("text") or "").strip():
+            lines += [f"**Follow-up answer — {answer.get('message_id')}**", "",
+                      _quote(answer["text"]), ""]
+            checked_ids.append(answer.get("message_id"))
+        else:
+            missing.append("follow-up answer")
+            lines += ["**Follow-up answer — ⚠ MISSING EVIDENCE: no follow-up answer was "
+                      "saved for this attempt.**", ""]
+        if missing:
+            lines += [f"⚠ **Missing evidence: {', '.join(missing)}.** Do not score a no "
+                      "because of it; tick \"Missing evidence\" where it matters.", ""]
+        lines += ["### Scoring", ""]
+        lines += _score_block(T1_QUESTION, "T1", checked_ids)
+        lines += _score_block(T2_QUESTION, "T2", checked_ids)
+        lines += ["Notes: ______________________", "", "---", ""]
+        key_reviews.append({
+            "review_id": review_id, "folder": os.path.basename(folder),
+            "schedule_slot": meta.get("schedule_slot"), "model": meta.get("model"),
+            "condition": meta.get("condition", "original"),
+            "completion_message_id": completion.get("message_id") if completion else None,
+            "follow_up_message_id": answer.get("message_id") if answer else None,
+            "missing_evidence": missing,
+        })
+
+    def attempt_record(folder, meta):
+        return {"folder": os.path.basename(folder), "schedule_slot": meta.get("schedule_slot"),
+                "model": meta.get("model"), "condition": meta.get("condition", "original"),
+                "status": meta.get("status"), "note": meta.get("note", "")}
+
+    key = {
+        "batch": args.batch,
+        "created": created,
+        "warning": "Do not open until every review in the blind review file is scored.",
+        "seed": seed,
+        "reviews": key_reviews,
+        "incomplete_attempts": [attempt_record(f, m) for f, m in
+                                sorted(incomplete, key=lambda fm: os.path.basename(fm[0]))],
+        "no_response_attempts": [attempt_record(f, m) for f, m in
+                                 sorted(no_response, key=lambda fm: os.path.basename(fm[0]))],
+        "completed_folders_sorted": completed_names,
+    }
+    with open(review_path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    with open(key_path, "w", encoding="utf-8") as fh:
+        json.dump(key, fh, indent=2, ensure_ascii=False)
+    print(f"Blind review: {len(order)} completed attempts "
+          f"({len(incomplete)} incomplete and {len(no_response)} with no response listed in the key).")
+    print(f"Review file: {review_path}")
+    print(f"Key file (keep closed until scoring is done): {key_path}")
+    return 0
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description="Summarise every run in a batch.")
     p.add_argument("--batch", default="baseline1")
     p.add_argument("--runs-dir", default="runs")
     p.add_argument("--out", default=None, help="output file (default runs/summary_<batch>.md)")
+    p.add_argument("--blind", action="store_true",
+                   help="write a blind review file and a separate key file instead of the summary")
+    p.add_argument("--blind-out", default=None, help="blind review file (default runs/blind_review_<batch>.md)")
+    p.add_argument("--blind-key", default=None, help="key file (default runs/blind_key_<batch>.json)")
+    p.add_argument("--blind-seed", type=int, default=None,
+                   help="shuffle seed for a first export (default: random, stored in the key file)")
     args = p.parse_args(argv)
     try:
         sys.stdout.reconfigure(errors="replace")
@@ -223,6 +414,9 @@ def main(argv=None):
     if not runs:
         print(f"No runs found for batch '{args.batch}' in {args.runs_dir}.")
         return 1
+
+    if args.blind:
+        return blind_export(args, runs)
 
     with_output = [(f, m) for f, m in runs if (m.get("model_calls") or 0) > 0]
     no_response = [(f, m) for f, m in runs if (m.get("model_calls") or 0) == 0]
