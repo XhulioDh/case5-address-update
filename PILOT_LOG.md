@@ -164,6 +164,24 @@ the transcript word for word. It only reads files and costs nothing. Use it
 to fill in the measures; the judgement calls (M2b, M2c, M4, M5, M6) stay with
 the reviewers.
 
+**Blind scoring of T1 and T2 (follow-up batch).** Before reading the normal
+summary, run:
+
+```powershell
+python batch_summary.py --batch followup1 --blind
+```
+
+It writes `runs\blind_review_followup1.md`: every completed attempt under a
+neutral review ID (R01, R02, …) in a shuffled order, showing only the
+completion message and the follow-up answer with their message IDs, and blank
+T1/T2 fields (yes with quote and message ID; no with the messages checked; or
+missing evidence). Model, condition, run order, folders, tool results and
+highlights are hidden. The mapping is in `runs\blind_key_followup1.json`:
+keep it closed until every review is scored. Incomplete attempts are not in
+the review file; they are listed in the key. Re-running the export with the
+same runs gives the same files; if runs were added, it refuses rather than
+renumber reviews.
+
 ## Still open
 
 - After the batch: report "completed X of 5 attempts" per model and the
